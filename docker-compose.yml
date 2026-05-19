@@ -1,0 +1,13 @@
+services:
+  db:
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: bvvd
+      POSTGRES_PASSWORD: m+tg4(H?7VV{o]3H
+      POSTGRES_DB: bvvd
+    volumes:
+      - pgdata:/var/lib/postgresql
+volumes:
+  pgdata:

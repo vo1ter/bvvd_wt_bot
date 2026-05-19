@@ -2,11 +2,16 @@
   "name": "bvvd_wt_bot",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/bot.ts",
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only src/bot.ts",
-    "build": "tsc",
-    "start": "node dist/bot.js"
+    "dev": "bun run --watch src/bot.ts",
+    "build": "bun build ./src/bot.ts --outdir ./dist --target=bun --bundle",
+    "start": "bun run dist/bot.js",
+    "db:start": "docker compose up -d",
+    "db:push": "npx drizzle-kit push",
+    "db:pull": "npx drizzle-kit pull",
+    "db:migrate": "npx drizzle-kit migrate",
+    "db:studio": "npx drizzle-kit studio"
   },
   "keywords": [],
   "author": "",
@@ -18,13 +23,13 @@
     "pg": "^8.20.0",
     "telegraf": "^4.16.3"
   },
+  "peerDependencies": {
+    "typescript": "^6.0.3"
+  },
   "devDependencies": {
-    "@types/node": "^25.7.0",
+    "@types/bun": "^1.3.14",
     "@types/pg": "^8.20.0",
     "drizzle-kit": "^0.31.10",
-    "ts-node-dev": "^2.0.0",
-    "tsx": "^4.22.3",
-    "typegram": "^5.2.0",
-    "typescript": "^6.0.3"
+    "typegram": "^5.2.0"
   }
 }

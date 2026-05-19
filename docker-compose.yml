@@ -4,9 +4,9 @@ services:
     ports:
       - 5432:5432
     environment:
-      POSTGRES_USER: bvvd
-      POSTGRES_PASSWORD: m+tg4(H?7VV{o]3H
-      POSTGRES_DB: bvvd
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: secretpassword
+      POSTGRES_DB: local
     volumes:
       - pgdata:/var/lib/postgresql
 volumes:

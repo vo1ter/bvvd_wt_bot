@@ -57,7 +57,7 @@ bot.command("create", async (ctx) => {
 	if (!user) return sendErrorMessage(ctx.message.chat.id, "We couldn't find your profile.")
 
 	const pet = await getPetByTelegramUser(telegramUser);
-	if (!pet) return sendErrorMessage(ctx.message.chat.id, "You already have a BVVD!")
+	if (pet) return sendErrorMessage(ctx.message.chat.id, "You already have a BVVD!")
 
 	const create = await createPet(user.id, (ctx.args[0]) ? ctx.args[0] : `${ctx.message.from.first_name}'s BVVD`);
 	if (!create) return sendErrorMessage(ctx.message.chat.id, "We couldn't create your BVVD for some reason. Pls contact us")

@@ -9,7 +9,7 @@ export const usersTable = pgTable("users", {
 export const usersPetsTable = pgTable("users_pets", {
     id: uuid().primaryKey().defaultRandom(),
     user_id: uuid().references(() => usersTable.id),
-    weight: real().notNull().default(1.0),
+    weight: real().notNull().default(1),
     name: text().notNull()
 });
 

@@ -6,30 +6,41 @@ import { usersPetsTable } from "db/schema";
 
 
 export async function createPet(userId: string, name?: string): Promise<boolean> {
-  try {
-    await db.insert(usersPetsTable).values({
-      user_id: userId,
-      name: (name) ? name : `${userId}'s BVVD`
-    });
-    return true;
-  }
-  catch (error: any) {
-    console.log("Error while trying to create a pet:\n", error.message)
-    return false;
-  }
+	try {
+		await db.insert(usersPetsTable).values({
+			user_id: userId,
+			name: name || `${userId}'s BVVD`
+		});
+		return true;
+	}
+	catch (error: any) {
+		console.log("Error while trying to create a pet:\n", error.message)
+		return false;
+	}
 }
 
 export async function getPetByUser(userId: string): Promise<Pet | undefined> {
-  return await db.query.usersPetsTable.findFirst({ where: eq(usersPetsTable.user_id, userId) });
+	return await db.query.usersPetsTable.findFirst({ where: eq(usersPetsTable.user_id, userId) });
 }
 
 export async function getPetByTelegramUser(telegramUserId: number): Promise<Pet | undefined> {
-  const user = await getUserByTelegramId(telegramUserId);
-  if (!user) throw new Error("No user with specified telegram id");
+	const user = await getUserByTelegramId(telegramUserId);
+	if (!user) throw new Error("No user with specified telegram id");
 
-  return await db.query.usersPetsTable.findFirst({ where: eq(usersPetsTable.user_id, user.id) });
+	return await db.query.usersPetsTable.findFirst({ where: eq(usersPetsTable.user_id, user.id) });
 }
 
 export async function getPet(petId: string): Promise<Pet | undefined> {
-  return await db.query.usersPetsTable.findFirst({ where: eq(usersPetsTable.id, petId) });
+	return await db.query.usersPetsTable.findFirst({ where: eq(usersPetsTable.id, petId) });
+}
+
+export async function renamePet(petId: string, newName: string): Promise<boolean> {
+	try {
+		await db.update(usersPetsTable).set({ name: newName }).where(eq(usersPetsTable.id, petId));
+		return true;
+	}
+	catch(error: any) {
+		console.log(`Error during pet rename: ${error.message}`);
+		return false;
+	}
 }

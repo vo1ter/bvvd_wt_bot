@@ -3,10 +3,8 @@ services:
     image: postgres
     ports:
       - 5432:5432
-    environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: secretpassword
-      POSTGRES_DB: local
+    env_file:
+      - .env
     volumes:
       - pgdata:/var/lib/postgresql
 volumes:

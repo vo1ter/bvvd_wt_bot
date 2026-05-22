@@ -1,4 +1,4 @@
-import { getPetByTelegramUser, createPet } from 'lib/pet'
+import { getPetByTelegramUser, createPet, renamePet } from 'lib/pet'
 import { getUserByTelegramId, createUser } from 'lib/user'
 import { Telegraf } from 'telegraf'
 
@@ -6,14 +6,14 @@ if (!Bun.env.TELEGRAM_BOT_TOKEN) {
 	throw new Error('TELEGRAM_BOT_TOKEN is not defined in environment variables')
 }
 
-const bot = new Telegraf(Bun.env.TELEGRAM_BOT_TOKEN!)
+const bot = new Telegraf(Bun.env.TELEGRAM_BOT_TOKEN)
 
 bot.start(async (ctx) => {
 	const user = ctx.message.from.id;
 	const queryResult = await getUserByTelegramId(user)
 
 	if (!queryResult) {
-		ctx.replyWithMarkdownV2(`You are not registered in our system\\. Please press the button below to register\\*\\.\n\n\\* \\- by registering with us you are agreeing with our [ToS](https\:\/\/bvvd\.femboy\.fyi\/tos)`, {
+		ctx.replyWithMarkdownV2(`You are not registered in our system\\. Please press the button below to register\\*\\.\n\n\\* \\- by registering with us you are agreeing with our [ToS](https://bvvd\\.femboy\\.fyi/tos)`, {
 			reply_markup: {
 				inline_keyboard: [
 					[{ text: "✅ Register", callback_data: "accept_tos" }]
@@ -60,9 +60,29 @@ bot.command("create", async (ctx) => {
 	if (pet) return sendErrorMessage(ctx.message.chat.id, "You already have a BVVD!")
 
 	const create = await createPet(user.id, (ctx.args[0]) ? ctx.args[0] : `${ctx.message.from.first_name}'s BVVD`);
-	if (!create) return sendErrorMessage(ctx.message.chat.id, "We couldn't create your BVVD for some reason. Pls contact us")
+	if (create) {return await ctx.reply("Your BVVD was created succesfully")}
 
-	else return await ctx.reply("Your BVVD was created succesfully")
+	else return sendErrorMessage(ctx.message.chat.id, "We couldn't create your BVVD for some reason. Pls contact us")
+})
+
+bot.command("name", async (ctx) => {
+	const telegramUser = ctx.message.from.id;
+	const user = await getUserByTelegramId(telegramUser);
+	if (!user) return sendErrorMessage(ctx.message.chat.id, "We couldn't find your profile.")
+	
+	const pet = await getPetByTelegramUser(telegramUser);
+	if (!pet) return sendErrorMessage(ctx.message.chat.id, "Your BVVD doesn't exist! Please create a new one using command /create")
+	
+	if(!ctx.args[0]) return ctx.reply(`Your BVVD's name is '${pet.name}'`);
+	
+	try {
+		await renamePet(pet.id, ctx.args[0]);
+		return ctx.reply(`Your BVVD's new name is '${ctx.args[0]}'`);
+	}
+	catch (error: any) {
+		console.log(`Failed to update pet's name: ${error.message}`);
+		return sendErrorMessage(ctx.message.chat.id, "We couldn't update your BVVD for some reason. Pls contact us");
+	}
 })
 
 bot.action("accept_tos", async (ctx) => {
@@ -88,8 +108,8 @@ bot.action("accept_tos", async (ctx) => {
 	setTimeout(async () => {
 		try {
 			await bot.telegram.deleteMessage(ctx.callbackQuery.message?.chat.id!, ctx.callbackQuery.message?.message_id!);
-		} catch (e) {
-			console.log("Could not delete registration message");
+		} catch (error: any) {
+			console.log(`Could not delete registration message: ${error.message}`);
 		}
 	}, 5000);
 });
@@ -100,8 +120,8 @@ export async function sendErrorMessage(chatId: number, text: string) {
 	setTimeout(async () => {
 		try {
 			await bot.telegram.deleteMessage(errorMessage.chat.id, errorMessage.message_id);
-		} catch (e) {
-			console.log("Could not delete error message (likely already deleted)");
+		} catch (error: any) {
+			console.log(`Could not delete error message: ${error.message}`);
 		}
 	}, 5000);
 }
